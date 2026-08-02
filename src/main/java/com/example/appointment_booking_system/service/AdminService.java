@@ -17,5 +17,9 @@ public interface AdminService {
 
     void cancelAppointmentByAdmin(Long appointmentId);
     void createDoctorAccount(CreateDoctorAccountDTO dto);
+
+    void deleteDoctor(Long doctorId);
+    List<com.example.appointment_booking_system.entity.User> getAllUsers();
+    void deleteUser(Long userId);
 }
 

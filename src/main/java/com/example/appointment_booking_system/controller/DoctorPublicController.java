@@ -29,5 +29,10 @@ public class DoctorPublicController {
     public List<Doctor> getAllDoctorsForLandingPage(){
         return doctorService.getAllDoctors();
     }
+
+    @GetMapping("/{id}")
+    public Doctor getDoctorById(@org.springframework.web.bind.annotation.PathVariable Long id) {
+        return doctorService.getDoctorById(id);
+    }
 }
 

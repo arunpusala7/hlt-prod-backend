@@ -39,5 +39,17 @@ public class DoctorServiceImpl implements DoctorService {
                 .orElseThrow(() -> new RuntimeException("Doctor not found"));
     }
 
+    @Override
+    public Doctor updateDoctorProfile(Long id, Doctor profileData) {
+        Doctor doctor = getDoctorById(id);
+        if (profileData.getAboutBio() != null) doctor.setAboutBio(profileData.getAboutBio());
+        if (profileData.getExperienceYears() != null) doctor.setExperienceYears(profileData.getExperienceYears());
+        if (profileData.getQualifications() != null) doctor.setQualifications(profileData.getQualifications());
+        if (profileData.getHospitalAffiliation() != null) doctor.setHospitalAffiliation(profileData.getHospitalAffiliation());
+        if (profileData.getSuccessStories() != null) doctor.setSuccessStories(profileData.getSuccessStories());
+        if (profileData.getTestimonials() != null) doctor.setTestimonials(profileData.getTestimonials());
+        if (profileData.getConsultationFee() != null) doctor.setConsultationFee(profileData.getConsultationFee());
+        return doctorRepository.save(doctor);
+    }
 }
 

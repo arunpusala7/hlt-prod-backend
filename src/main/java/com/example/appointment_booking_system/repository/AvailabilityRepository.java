@@ -14,6 +14,7 @@ import java.util.List;
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
 
     List<Availability> findByDoctorIdAndDate(Long doctorId, LocalDate date);
+    void deleteByDoctorId(Long doctorId);
     boolean existsByDoctorAndDateAndStartTimeAndEndTime(
             Doctor doctor,
             LocalDate date,

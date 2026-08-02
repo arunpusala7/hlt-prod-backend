@@ -24,6 +24,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final ApplicationEventPublisher eventPublisher;
     private final CancelledAppointmentRepository cancelledRepo;
     private final WaitlistService waitlistService;
+    private final EmailService emailService;
 
 
     public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
@@ -31,13 +32,15 @@ public class AppointmentServiceImpl implements AppointmentService {
                                   DoctorRepository doctorRepository,
                                   ApplicationEventPublisher eventPublisher,
                                   CancelledAppointmentRepository cancelledRepo,
-                                  WaitlistService waitlistService) {
+                                  WaitlistService waitlistService,
+                                  EmailService emailService) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
         this.doctorRepository = doctorRepository;
         this.eventPublisher = eventPublisher;
         this.cancelledRepo = cancelledRepo;
         this.waitlistService = waitlistService;
+        this.emailService = emailService;
     }
 
     // ============================================================
@@ -145,6 +148,20 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .build();
 
         cancelledRepo.save(cancelled);
+
+        // Send Cancellation Email to Patient
+        if (a.getUser() != null && a.getUser().getEmail() != null) {
+            emailService.sendCancellationEmail(
+                    a.getUser().getEmail(),
+                    a.getUser().getName(),
+                    a.getDoctor() != null ? a.getDoctor().getName() : "Doctor",
+                    a.getAppointmentDate() != null ? a.getAppointmentDate().toString() : "",
+                    a.getStartTime() != null ? a.getStartTime().toString() : "",
+                    reason,
+                    a.getTicketId()
+            );
+        }
+
         appointmentRepository.delete(a);
         waitlistService.checkWaitlistAfterCancellation(a.getDoctor().getId(), a.getAppointmentDate());
     }
@@ -182,6 +199,18 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment saved = appointmentRepository.save(appointment);
         waitlistService.checkWaitlistAfterCancellation(doctorId, oldDate);
 
+        // Send Reschedule Email to Patient
+        if (saved.getUser() != null && saved.getUser().getEmail() != null) {
+            emailService.sendRescheduleEmail(
+                    saved.getUser().getEmail(),
+                    saved.getUser().getName(),
+                    saved.getDoctor() != null ? saved.getDoctor().getName() : "Doctor",
+                    saved.getAppointmentDate() != null ? saved.getAppointmentDate().toString() : "",
+                    saved.getStartTime() != null ? saved.getStartTime().toString() : "",
+                    saved.getTicketId()
+            );
+        }
+
         return AppointmentResponseDTO.builder()
                 .appointmentId(saved.getId())
                 .userId(saved.getUser().getId())
@@ -200,7 +229,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public List<AppointmentResponseDTO> getAppointmentsByUser(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("User not found: " + email));
 
         return appointmentRepository.findByUserId(user.getId()).stream()
                 .map(a -> {
@@ -209,19 +238,21 @@ public class AppointmentServiceImpl implements AppointmentService {
                     dto.setUserId(user.getId());
                     dto.setUserName(user.getName());
 
-                    // 🔥 THE FIX: Added doctorId mapping here
                     if (a.getDoctor() != null) {
                         dto.setDoctorId(a.getDoctor().getId());
                         dto.setDoctorName(a.getDoctor().getName());
                         dto.setDoctorSpecialization(a.getDoctor().getSpecialization());
+                    } else {
+                        dto.setDoctorName("Medical Specialist");
+                        dto.setDoctorSpecialization("General Care");
                     }
 
                     dto.setDate(a.getAppointmentDate());
                     dto.setStartTime(a.getStartTime());
-                    dto.setEndTime(a.getEndTime()); // Added for completeness
-                    dto.setStatus(a.getStatus().name());
+                    dto.setEndTime(a.getEndTime());
+                    dto.setStatus(a.getStatus() != null ? a.getStatus().name() : "BOOKED");
                     dto.setPrescription(a.getPrescription());
-                    dto.setTicketId(a.getTicketId()); // Added for prescription downloads
+                    dto.setTicketId(a.getTicketId());
                     return dto;
                 })
                 .collect(Collectors.toList());

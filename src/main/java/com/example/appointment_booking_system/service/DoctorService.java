@@ -16,5 +16,5 @@ public interface DoctorService {
 
     Doctor getDoctorById(Long id);
     Doctor getDoctorByEmail(String email);
-
+    Doctor updateDoctorProfile(Long id, Doctor profileData);
 }

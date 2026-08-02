@@ -6,6 +6,7 @@ public class RegisterRequestDTO {
     private String email;
     private String password;
     private String role;
+    private String otp;
 
     public String getName() {
         return name;
@@ -37,5 +38,13 @@ public class RegisterRequestDTO {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
     }
 }

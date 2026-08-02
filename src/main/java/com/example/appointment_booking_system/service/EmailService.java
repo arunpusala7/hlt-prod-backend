@@ -16,11 +16,8 @@ public class EmailService {
 
     private final JavaMailSender javaMailSender;
 
-    // It's good practice to read the email from application.properties so you don't hardcode it
-    // @Value("${spring.mail.username}")
-    // private String fromEmail;
-    // Or just keep your hardcoded string for now:
-    private final String fromEmail = "arunkumarpusala7@gmail.com";
+    @Value("${spring.mail.username}")
+    private String fromEmail;
 
     public EmailService(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
@@ -64,5 +61,54 @@ public class EmailService {
             System.err.println("❌ Failed to send PDF email: " + e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    @Async
+    public void sendCancellationEmail(String toEmail, String userName, String doctorName, String date, String time, String reason, String ticketId) {
+        String subject = "❌ Appointment Cancelled - Ticket #" + (ticketId != null ? (ticketId.length() >= 8 ? ticketId.substring(0, 8) : ticketId) : "N/A");
+        String body = String.format(
+                "Hello %s,\n\n" +
+                "Your appointment with Dr. %s scheduled for %s at %s has been cancelled.\n\n" +
+                "Reason for Cancellation: %s\n" +
+                "Ticket ID: %s\n\n" +
+                "If you wish to book a new appointment or check availability, please visit the HealthConnect portal.\n\n" +
+                "Best Regards,\n" +
+                "HealthConnect Team",
+                userName, doctorName, date, time, (reason != null && !reason.trim().isEmpty() ? reason : "Not specified"), ticketId
+        );
+        sendEmail(toEmail, subject, body);
+    }
+
+    @Async
+    public void sendRescheduleEmail(String toEmail, String userName, String doctorName, String newDate, String newTime, String ticketId) {
+        String subject = "📅 Appointment Rescheduled - Ticket #" + (ticketId != null ? (ticketId.length() >= 8 ? ticketId.substring(0, 8) : ticketId) : "N/A");
+        String body = String.format(
+                "Hello %s,\n\n" +
+                "Your appointment with Dr. %s has been successfully rescheduled.\n\n" +
+                "Updated Appointment Details:\n" +
+                "Date: %s\n" +
+                "Time: %s\n" +
+                "Ticket ID: %s\n\n" +
+                "Please present your ticket details when arriving for your consultation.\n\n" +
+                "Best Regards,\n" +
+                "HealthConnect Team",
+                userName, doctorName, newDate, newTime, ticketId
+        );
+        sendEmail(toEmail, subject, body);
+    }
+
+    @Async
+    public void sendOtpEmail(String toEmail, String otpCode) {
+        String subject = "🔑 HealthConnect - Email Verification Code: " + otpCode;
+        String body = String.format(
+                "Hello,\n\n" +
+                "Your One-Time Verification Code (OTP) for HealthConnect registration is:\n\n" +
+                "   %s\n\n" +
+                "This code is valid for 5 minutes. Please do not share this code with anyone.\n\n" +
+                "Best Regards,\n" +
+                "HealthConnect Team",
+                otpCode
+        );
+        sendEmail(toEmail, subject, body);
     }
 }

@@ -38,13 +38,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     );
 
     List<Appointment> findByDoctorId(Long doctorId);
+    void deleteByDoctorId(Long doctorId);
+    void deleteByUserId(Long userId);
 
-    // 🚨 3. CRITICAL FIX: Keep this JOIN FETCH
-    @Query("SELECT a FROM Appointment a JOIN FETCH a.doctor JOIN FETCH a.user WHERE a.user.id = :userId")
+    // 🚨 3. CRITICAL FIX: Use LEFT JOIN FETCH to allow null-safe joins
+    @Query("SELECT a FROM Appointment a LEFT JOIN FETCH a.doctor LEFT JOIN FETCH a.user WHERE a.user.id = :userId")
     List<Appointment> findByUserId(@Param("userId") Long userId);
 
-    // 🚨 4. CRITICAL FIX: Keep this JOIN FETCH
-    @Query("SELECT a FROM Appointment a JOIN FETCH a.doctor JOIN FETCH a.user WHERE a.ticketId = :ticketId")
+    // 🚨 4. CRITICAL FIX: Use LEFT JOIN FETCH
+    @Query("SELECT a FROM Appointment a LEFT JOIN FETCH a.doctor LEFT JOIN FETCH a.user WHERE a.ticketId = :ticketId")
     Optional<Appointment> findByTicketId(@Param("ticketId") String ticketId);
 
 

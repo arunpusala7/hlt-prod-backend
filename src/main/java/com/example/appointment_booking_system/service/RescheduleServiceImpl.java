@@ -20,12 +20,15 @@ public class RescheduleServiceImpl implements RescheduleService {
 
     private final AppointmentRepository appointmentRepository;
     private final AvailabilityRepository availabilityRepository;
+    private final EmailService emailService;
 
     public RescheduleServiceImpl(
             AppointmentRepository appointmentRepository,
-            AvailabilityRepository availabilityRepository) {
+            AvailabilityRepository availabilityRepository,
+            EmailService emailService) {
         this.appointmentRepository = appointmentRepository;
         this.availabilityRepository = availabilityRepository;
+        this.emailService = emailService;
     }
 
     // 🔹 FETCH SLOTS FOR RESCHEDULE
@@ -84,7 +87,18 @@ public class RescheduleServiceImpl implements RescheduleService {
         appt.setEndTime(dto.getEndTime());
         appt.setStatus(appt.getStatus().RESCHEDULED);
 
-        appointmentRepository.save(appt);
+        Appointment saved = appointmentRepository.save(appt);
+
+        if (saved.getUser() != null && saved.getUser().getEmail() != null) {
+            emailService.sendRescheduleEmail(
+                    saved.getUser().getEmail(),
+                    saved.getUser().getName(),
+                    saved.getDoctor() != null ? saved.getDoctor().getName() : "Doctor",
+                    saved.getAppointmentDate() != null ? saved.getAppointmentDate().toString() : "",
+                    saved.getStartTime() != null ? saved.getStartTime().toString() : "",
+                    saved.getTicketId()
+            );
+        }
     }
 
 

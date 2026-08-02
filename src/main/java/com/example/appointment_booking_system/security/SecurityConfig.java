@@ -36,28 +36,23 @@ public class SecurityConfig {
                 // ... inside securityFilterChain method ...
 
                 .authorizeHttpRequests(auth -> auth
-                        // PUBLIC
+                        // PUBLIC & PATIENT ENDPOINTS
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // USER
-                        .requestMatchers(HttpMethod.GET, "/api/doctors").hasAnyRole("USER","ADMIN")
-                        .requestMatchers("/api/appointments/**").hasRole("USER")
-                        .requestMatchers(HttpMethod.GET, "/api/availability/**").hasRole("USER")
-                        .requestMatchers("/api/waitlist/**").hasRole("USER")
-                        //.requestMatchers("/api/availability/**").permitAll()
-
-                        // DOCTOR
-                        // ✅ Added specific match for patient history to ensure path-variables are allowed
-                        .requestMatchers("/api/doctor/patient-history/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/doctor/**").hasRole("DOCTOR")
-                        .requestMatchers("/api/availability/add").hasRole("DOCTOR")
-                        .requestMatchers("/api/appointments/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/doctors/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/availability/**").permitAll()
+                        .requestMatchers("/api/payments/**").permitAll()
+                        .requestMatchers("/api/user/**").permitAll()
+                        .requestMatchers("/api/appointments/**").permitAll()
+                        .requestMatchers("/api/waitlist/**").permitAll()
 
                         // ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // 🔓 PUBLIC landing page doctors
-                        .requestMatchers(HttpMethod.GET, "/api/doctors/landing-page-doctors").permitAll()
+
+                        // DOCTOR
+                        .requestMatchers("/api/doctor/patient-history/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/doctor/**").hasRole("DOCTOR")
+                        .requestMatchers("/api/availability/add").hasRole("DOCTOR")
 
                         .anyRequest().authenticated()
                 )

@@ -21,14 +21,17 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
     private final AppointmentRepository appointmentRepo;
     private final DoctorRepository doctorRepo;
     private final CancelledAppointmentRepository cancelledRepo;
+    private final EmailService emailService;
 
     public DoctorAppointmentServiceImpl(
             AppointmentRepository appointmentRepo,
             DoctorRepository doctorRepo,
-            CancelledAppointmentRepository cancelledRepo) {
+            CancelledAppointmentRepository cancelledRepo,
+            EmailService emailService) {
         this.appointmentRepo = appointmentRepo;
         this.doctorRepo = doctorRepo;
         this.cancelledRepo = cancelledRepo;
+        this.emailService = emailService;
     }
 
     // Add this inside DoctorAppointmentServiceImpl.java
@@ -98,6 +101,20 @@ public class DoctorAppointmentServiceImpl implements DoctorAppointmentService {
                 .build();
 
         cancelledRepo.save(cancelled);
+
+        // Send Cancellation Email to Patient
+        if (a.getUser() != null && a.getUser().getEmail() != null) {
+            emailService.sendCancellationEmail(
+                    a.getUser().getEmail(),
+                    a.getUser().getName(),
+                    a.getDoctor() != null ? a.getDoctor().getName() : "Doctor",
+                    a.getAppointmentDate() != null ? a.getAppointmentDate().toString() : "",
+                    a.getStartTime() != null ? a.getStartTime().toString() : "",
+                    reason,
+                    a.getTicketId()
+            );
+        }
+
         appointmentRepo.delete(a);
     }
 

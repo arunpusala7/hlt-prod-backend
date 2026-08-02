@@ -30,8 +30,14 @@ public class DoctorController {
         return doctorService.getDoctorByEmail(auth.getName());
     }
 
-
-
-
+    // DOCTOR: update profile & bio
+    @PutMapping("/profile")
+    public ResponseEntity<Doctor> updateDoctorProfile(
+            Authentication auth,
+            @RequestBody Doctor profileData) {
+        Doctor doctor = doctorService.getDoctorByEmail(auth.getName());
+        Doctor updated = doctorService.updateDoctorProfile(doctor.getId(), profileData);
+        return ResponseEntity.ok(updated);
+    }
 }
 
