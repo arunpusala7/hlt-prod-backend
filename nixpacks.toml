@@ -1,0 +1,5 @@
+[providers]
+providers = ["java"]
+
+[variables]
+NIXPACKS_JDK_VERSION = "17"
