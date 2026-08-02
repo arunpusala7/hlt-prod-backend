@@ -1,15 +1,9 @@
 package com.example.appointment_booking_system.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.*;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class AppointmentRequestDTO {
 
     private Long doctorId;
@@ -23,5 +17,45 @@ public class AppointmentRequestDTO {
     @JsonFormat(pattern = "HH:mm")
     private LocalTime endTime;
 
+    public AppointmentRequestDTO() {
+    }
 
+    public AppointmentRequestDTO(Long doctorId, LocalDate date, LocalTime startTime, LocalTime endTime) {
+        this.doctorId = doctorId;
+        this.date = date;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public Long getDoctorId() {
+        return doctorId;
+    }
+
+    public void setDoctorId(Long doctorId) {
+        this.doctorId = doctorId;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
 }
