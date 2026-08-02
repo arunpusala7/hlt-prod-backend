@@ -23,7 +23,10 @@ public class JwtTokenProvider {
 
     @PostConstruct
     public void init() {
-        byte[] keyBytes = jwtSecret.getBytes(StandardCharsets.UTF_8);
+        String cleanSecret = (jwtSecret != null && !jwtSecret.trim().isEmpty()) 
+                ? jwtSecret.trim().replaceAll("^\"|\"$", "") 
+                : "HealthConnectSuperSecretProductionKey2026With256BitsMinimumLength";
+        byte[] keyBytes = cleanSecret.getBytes(StandardCharsets.UTF_8);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -43,9 +46,12 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String token) {
         try {
+            if (token == null || token.trim().isEmpty()) {
+                return false;
+            }
             parseClaims(token);
             return true;
-        } catch (JwtException | IllegalArgumentException e) {
+        } catch (Exception e) {
             return false;
         }
     }
