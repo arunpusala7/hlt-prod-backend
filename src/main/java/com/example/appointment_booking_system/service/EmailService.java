@@ -57,9 +57,8 @@ public class EmailService {
             javaMailSender.send(message);
             System.out.println("📧 (Async) PDF Email sent to: " + toEmail);
 
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             System.err.println("❌ Failed to send PDF email: " + e.getMessage());
-            throw new RuntimeException(e);
         }
     }
 
